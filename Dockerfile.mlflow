@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+# Install MLflow (and any extras you need, e.g. for cloud storage backends)
+RUN pip install --no-cache-dir 'mlflow>=3.1'
+
+WORKDIR /usr/src/app
+
+EXPOSE 5050
+
+ENTRYPOINT ["mlflow", "server"]
+CMD ["--host", "0.0.0.0", \
+     "--port", "5050", \
+     "--backend-store-uri", "sqlite:////mlruns/db/mlflow.db", \
+     "--artifacts-destination", "/mlruns", \
+     "--serve-artifacts", \
+     "--allowed-hosts", "mlflow:5050,localhost:5050", \
+     "--cors-allowed-origins", "http://localhost:5050"]

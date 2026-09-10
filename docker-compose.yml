@@ -1,0 +1,40 @@
+services:
+ 
+  cv:
+   image: cv:latest 
+   container_name: cv
+   build:
+      context: .
+      dockerfile: Dockerfile 
+   entrypoint: []
+   depends_on:
+      - mlflow
+   volumes:
+      - /home/juhi/cv:/usr/src/app/
+   runtime: nvidia  # This enables CUDA support
+   environment:
+     - NVIDIA_VISIBLE_DEVICES="0, 1"
+   command: torchrun --nproc_per_node=2 /usr/src/app/train.py
+   deploy:
+     resources:
+       reservations:
+         devices:
+           - driver: nvidia
+             count: 2 
+             capabilities: [gpu]
+
+  mlflow:
+    image: mlflow-server
+    container_name: mlflow-server
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    working_dir: /usr/src/app/
+    volumes:
+      - /home/juhi/cv/mlruns:/usr/src/app/mlruns    
+    expose: 
+      - "5050"    
+    ports:
+      - "5050:5050"
+
+  

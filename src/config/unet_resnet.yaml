@@ -1,0 +1,4 @@
+model:
+  model_name: "unet"
+  encoder_name: "resnet50" #unet++ efficientnet-b4 # unet, unet++, DeepLabV3Plus resnet50 # segformer  mit_b2
+  encoder_weights: "imagenet"

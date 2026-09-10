@@ -1,0 +1,16 @@
+torch==2.8.0
+torchvision==0.23.0
+numpy==1.26.4
+matplotlib==3.8.0
+scikit-learn==1.6.1
+tqdm==4.66.1    
+pandas==2.2.3
+plotly==6.0.1
+pyyaml==6.0.1
+segmentation-models-pytorch
+mlflow>=3.1
+opencv-python-headless
+albumentations
+iterative-stratification
+psutil
+ultralytics
