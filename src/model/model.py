@@ -6,9 +6,9 @@ class SegModel(torch.nn.Module):
     def __init__(self, config):
         super(SegModel, self).__init__()
         self.config = config
-
+        
         if self.config.model.model_name == "segformer":        
-            self.model = smp.Segformer(                # UnetPlusPlus Unet Segformer FPN DeepLabV3Plus
+            self.model = smp.Segformer(
                 encoder_name=self.config.model.encoder_name,
                 encoder_weights=self.config.model.encoder_weights,
                 in_channels=self.config.model.in_channels,
@@ -55,7 +55,7 @@ class SegModel(torch.nn.Module):
 
         dice_loss, bce_loss = self.criterion(pred_x, y)
 
-        loss = dice_loss + bce_loss
+        loss = (0.5 * dice_loss) + (0.5 * bce_loss)
         
         loss_metrics = {
             "loss": loss.detach().item(),

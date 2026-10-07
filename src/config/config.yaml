@@ -3,7 +3,7 @@ model:
   weight_decay: 0.0001
   batch_size: 16
   img_height: 256
-  img_width: 256
+  img_width: 512
   in_channels: 3
   num_classes: 4
   num_workers: 2
