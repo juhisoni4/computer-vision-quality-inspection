@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import time
 import mlflow
 import torch
 import numpy as np
@@ -250,6 +250,57 @@ class Evaluation:
             recall_c[c] = recall
             
         return precision_c, recall_c
+
+    def benchmark_throughput(self, model, input_tensor, batch_size=8, warmup_steps=20, benchmark_steps=100):
+        """
+        Measures model-only inference throughput.
+
+        input_tensor: one preprocessed image, shape [1, C, H, W]
+        batch_size: number of images per forward pass"""        
+
+        device = next(model.parameters()).device
+        model.eval()
+
+        # Repeat the sample to create a batch.
+        batch = input_tensor.to(device).repeat(
+            batch_size, 1, 1, 1
+        )
+
+        # Warm up the model.
+        with torch.inference_mode():
+            for _ in range(warmup_steps):
+                _ = model.model(batch)
+
+        if device.type == "cuda":
+            torch.cuda.synchronize(device)
+
+        # Timed inference.
+        start = time.perf_counter()
+
+        with torch.inference_mode():
+            for _ in range(benchmark_steps):
+                _ = model.model(batch)
+
+        if device.type == "cuda":
+            torch.cuda.synchronize(device)
+
+        elapsed = time.perf_counter() - start
+
+        total_images = batch_size * benchmark_steps
+        throughput = total_images / elapsed
+        batch_latency_ms = (
+            elapsed / benchmark_steps
+        ) * 1000
+        average_ms_per_image = (
+            elapsed / total_images
+        ) * 1000
+
+        return {
+            "batch_size": batch_size,
+            "throughput_images_per_sec": throughput,
+            "batch_latency_ms": batch_latency_ms,
+            "average_ms_per_image": average_ms_per_image,
+        }
         
     def complete_evaluation(self, model, device, valid_loader, epoch):
         dice_scores = []
@@ -293,7 +344,7 @@ class Evaluation:
                   recall_c1.append(recall_c[0])
                   recall_c2.append(recall_c[1])
                   recall_c3.append(recall_c[2])
-                  recall_c4.append(recall_c[3])            
+                  recall_c4.append(recall_c[3])
 
             image_data, mask_data = next(iter(valid_loader))
             image_data = image_data.to(device, non_blocking=True)

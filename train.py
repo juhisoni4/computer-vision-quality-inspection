@@ -68,14 +68,6 @@ def train(data_config, local_rank, rank, world_size):
         seed=data_config.training.seed
     )
 
-    valid_sampler = DistributedSampler(
-        valid_dataset,
-        num_replicas=world_size,
-        rank=rank,
-        shuffle=False,
-        seed=data_config.training.seed
-    )
-
     train_loader = DataLoader(
         train_dataset,  # Adjust the slice as needed
         batch_size=data_config.model.batch_size,
@@ -87,8 +79,6 @@ def train(data_config, local_rank, rank, world_size):
     valid_loader = DataLoader(
         valid_dataset,  # Adjust the slice as needed
         batch_size=data_config.model.batch_size,
-        sampler=valid_sampler,
-        pin_memory=True,
         num_workers=data_config.model.num_workers
     )
 
